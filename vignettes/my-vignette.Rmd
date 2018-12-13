@@ -1,0 +1,115 @@
+---
+title: "Simulating the simple bivariate point pattern model with cross-interaction"
+author: "Tuomas Rajala"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bivariate Model}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+Very quick demo of how to simulate from the model we introduced in our paper.
+
+```{r}
+library(bivpower)
+library(spatstat)
+```
+
+## Fixed abundances
+
+The simulation is based on the ```lambda``` and  ```rcox``` functions and is essentially just a wrapper for these two. The wrapper was written for fixed abundance simulations, and it is quite easy to use: 
+
+```{r}
+# Window
+W <- square(100)
+# interaction
+b <- -0.5
+# abundances
+n <- c(50, 80)
+# scale
+sig <- 10/2
+
+# Simulation 
+x <- sim_biv_model(n = n, W = W, theta = b, sigma = sig)
+
+head(x)
+```
+
+To get directly a ```ppp``` -object use
+
+```{r, fig.width=5, fig.height=5}
+xppp <- sim_biv_model(n = n, W = W, theta = b, sigma = sig, asppp = TRUE)
+plot(xppp, cols=1:2)
+```
+
+To provide fixed species 1
+
+```{r,fig.width=5, fig.height=4}
+x1 <- x[ x[,3] == 1, -3]
+z <- sim_biv_model(n = n, W = W, theta = b, sigma = sig, x1 = x1, asppp=TRUE)
+same1 <- listof(xym2ppp(x, W= W), z) # xym2ppp and ppp2xym provided
+plot(same1, cols=1:2)
+```
+
+
+## Free abundance simulation
+
+Two ways are shown here. First is direct and second is more illustrative.
+
+### Poisson variation
+
+Given 'n', samples $n_i\sim Poisson(n_i)$
+
+```{r}
+# Simulation 
+xf <- sim_biv_model(n = n, W = W, theta = b, sigma = sig, free=TRUE)
+table(xf[,3])
+```
+
+### Unconditional simulation by hand
+
+As noted above, the wrapper consists of two stages. Let's go through them to see how to simulate unconditionally from the model.
+
+```{r, fig.width=4.2, fig.height=5}
+# 1.  Generate type 1 from Poisson(lam1, W)
+lam1 <- 50/area(W)
+n1 <- rpois(1, lam1*area(W))  # redundancy just to be clear
+bbox <- with(W, cbind(xrange, yrange)) # bounding box
+x1 <- apply(bbox, 2, function(ab) runif(n1, ab[1], ab[2]) ) # type 1 simulation
+
+# 2. Create the lam2|x1. 
+alpha0 <- log(80/area(W)) # would be equal to log(lambda) if interaction b = 0
+lam2 <- lambda( x1,  kernel ="gauss", sigma = sig, type = "product", alpha = c(alpha0, b) )
+
+print(lam2)
+
+
+# 3. Simulate type 2 using thinning
+x2 <- rcox(lambda = lam2, bbox = bbox) 
+
+# Or fixed n using MH
+x2f <- rcox(lambda = lam2, bbox = bbox, n = 50 , iter = 1e4)
+
+# Done. Visualise the lam2
+
+lam2im <- coxintensity2matrix(lam2, bbox = bbox, nx = 123)
+plot(lam2im, col = gray.colors(12))
+points(x1)
+points(x2$x, pch=2, col=2)
+```
+
+
+
+
+
+
+
+
