@@ -18,14 +18,14 @@ knitr::opts_chunk$set(
 
 Very quick demo of how to simulate from the model we introduced in our paper.
 
-```{r}
+```{r, message=FALSE, warning=FALSE}
 library(bivpower)
 library(spatstat)
 ```
 
 ## Fixed abundances
 
-The simulation is based on the ```lambda``` and  ```rcox``` functions and is essentially just a wrapper for these two. The wrapper was written for fixed abundance simulations, and it is quite easy to use: 
+The simulation is based on the `lambda` and  `rcox` functions and is essentially just a wrapper for these two. The wrapper was written for fixed abundance simulations, and it is quite easy to use: 
 
 ```{r}
 # Window
@@ -43,7 +43,7 @@ x <- sim_biv_model(n = n, W = W, theta = b, sigma = sig)
 head(x)
 ```
 
-To get directly a ```ppp``` -object use
+To get directly a `ppp` -object use
 
 ```{r, fig.width=5, fig.height=5}
 xppp <- sim_biv_model(n = n, W = W, theta = b, sigma = sig, asppp = TRUE)
@@ -66,7 +66,7 @@ Two ways are shown here. First is direct and second is more illustrative.
 
 ### Poisson variation
 
-Given 'n', samples $n_i\sim Poisson(n_i)$
+Given point counts  $(n_1,n_2)$ as parameter `n`, samples new sample sizes $n_i\sim Poisson(n_i)$.
 
 ```{r}
 # Simulation 
