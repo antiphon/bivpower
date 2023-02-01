@@ -1,7 +1,7 @@
 Package: bivpower
 Type: Package
 Title: Examples of Bivariate Power Paper
-Version: 0.1.0
+Version: 0.2
 Author: Tuomas Rajala
 Maintainer: Tuomas Rajala <tuomas.rajala@iki.fi>
 Description: All code needed to reproduce the example calculations in the bivariate point pattern analysis power by manuscript Rajala, Murrell, Olhede, 2018.
@@ -10,7 +10,7 @@ Encoding: UTF-8
 LazyData: true
 Imports: Rcpp (>= 0.12.14)
 LinkingTo: Rcpp
-RoxygenNote: 6.0.1
+RoxygenNote: 7.2.3
 Suggests: knitr,
     rmarkdown
 VignetteBuilder: knitr

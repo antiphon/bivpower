@@ -4,6 +4,9 @@
 #include <vector>
 #include "ShotnoiseField.h"
 using namespace Rcpp;
+
+#define PI 3.141593
+
 /********************************************************************************************/
   ShotnoiseField::~ShotnoiseField()
 {
@@ -50,7 +53,7 @@ double ShotnoiseField::getValue(double x, double y){
 double ShotnoiseField::getValue(double x, double y, double z){
   return (this->*valueP3)(x, y, z);
 }
-  
+
 double ShotnoiseField::getValueSum(double x, double y){
   int i;
   double v=0;
@@ -85,7 +88,7 @@ double ShotnoiseField::getValueProd3(double x, double y, double z){
   return v * exp(alpha(0));
 }
 
-  
+
 // Note :: all distances are squared!
 
 double ShotnoiseField::dist(int *i, double x, double y){

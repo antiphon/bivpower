@@ -4,8 +4,7 @@
 \alias{sim_biv_model}
 \title{Simulate Simple Bivariate Interaction Model}
 \usage{
-sim_biv_model(n, theta, sigma, W, free = FALSE, ..., x1 = NULL,
-  asppp = FALSE)
+sim_biv_model(n, theta, sigma, W, free = FALSE, ..., x1 = NULL, asppp = FALSE)
 }
 \arguments{
 \item{n}{vector of length 2, target point counts}

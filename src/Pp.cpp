@@ -15,10 +15,10 @@ Pp::Pp(std::vector<double> win, int toroidal) {
   dimension = (int) win.size()/2;
 	window = win;
   use_blocking = false;
-  
+
   dist = &Pp::distEuclidian2D;
   cache.resize(5);
-  
+
   // set distance metrics. Avoid if's as these are called alot.
   if(dimension==3) {
     if(tor) {
@@ -52,7 +52,7 @@ double Pp::getZ(int *i) { return points.at(*i).getZ();} ;
 /********************************************************************************************/
 int Pp::push_back(double x, double y) {
   return Pp::push_back(x, y, 0);
-  
+
 }
 /********************************************************************************************/
 int Pp::push_back(double x, double y, double z) {
@@ -67,13 +67,13 @@ int Pp::push_back(double x, double y, double z) {
   set_block(&idx);
   return idx;
 }
-  
+
 /********************************************************************************************/
 void Pp::pop_back() {
   int m = points.size()-1;
   remove(&m);
 }
-  
+
 /********************************************************************************************/
 void Pp::move(int *i, double x, double y){
   points.at(*i).move(&x, &y);
@@ -121,16 +121,16 @@ void Pp::remove_blockmembership(int *i){
       blockmembers.at(k).erase( blockmembers.at(k).begin()+j );
 //      printf(" (ok)\n");
     }
-    else{ printf("** %i not in right block ?\n", *i);}
+    //else{ Rprintf("** %i not in right block ?\n", *i);}
   }
 }
 /********************************************************************************************/
 void Pp::shift_blocking_indices_by_one(int *i) {
       if(*i < N-1){
         // must update all numbers from i->n! @TODO find a better way
-        int j,k;        
+        int j,k;
         for(j=0; j < blockmembers.size(); j++)
-        for(k=0; k < blockmembers.at(j).size(); k++) 
+        for(k=0; k < blockmembers.at(j).size(); k++)
           if(blockmembers.at(j).at(k) > *i) blockmembers.at(j).at(k)--;
       }
 }
@@ -148,7 +148,7 @@ void Pp::remove(int *i) {
 
 /********************************************************************************************/
 void Pp::start_blocking(double max_range) {
-  
+
   // compute grid: in each dimension, what is the min grid size > max_range
   int nx, ny, nz, nblocks=0;
   if(max_range > window.at(1) - window.at(0)) nx = 1;
@@ -244,7 +244,7 @@ std::vector<int> Pp::block_neighbours(int *ii) {
   int idx = points.at(*ii).getId();
   // the neighbouring blocks:
   std::vector<int> nb, ijk;
-  
+
   //printf("** idx: %i\n ", idx);
   //printf("** pushed to np: %i\n ", (int)nb.size());
   ijk = block_index_to_ijk(&idx);
@@ -265,7 +265,7 @@ std::vector<int> Pp::block_neighbours(int *ii) {
         }
         if( (nj >-1) & (nj < blocks.at(1))){
           if(dimension==3){
-            for(k=-1; k < 2; k++){  
+            for(k=-1; k < 2; k++){
               nk = ijk.at(2)+k;
               if(tor) {
                 if(nk<0) nk = blocks.at(2)+nk;
@@ -277,7 +277,7 @@ std::vector<int> Pp::block_neighbours(int *ii) {
             }
           }
           else{
-            nb.push_back( block_ijk_to_index(ni, nj, nk) );            
+            nb.push_back( block_ijk_to_index(ni, nj, nk) );
           }
         }
       }
@@ -323,7 +323,7 @@ bool Pp::block_neighbours(int *i, int *j) {
   int dy = abs(j1-j2);
   if(tor) dy = min( abs(blocks.at(1)-dy), dy);
   if( dy > 1) return false;
-  
+
   int i1 = idx1 - k1*ab - j1*a;
   int i2 = idx2 - k2*ab - j2*a;
   int dx = abs(i1-i2);
@@ -331,7 +331,7 @@ bool Pp::block_neighbours(int *i, int *j) {
   if( dx > 1) return false;
   return true;
 };
-  
+
 
 int min(int a, int b) {
   if(a < b) return a;
@@ -386,7 +386,7 @@ double Pp::distToroidal2D(int *i, int *j) {
 					pow( fminf( window[1]-window[0]-fabs(points.at(*i).getX()-points.at(*j).getX()) , fabs(points.at(*i).getX()-points.at(*j).getX()) ) ,2.0F) +
 					pow( fminf( window[3]-window[2]-fabs(points.at(*i).getY()-points.at(*j).getY()) , fabs(points.at(*i).getY()-points.at(*j).getY()) ) ,2.0F)
           );
-  
+
 }
 
 /********************************************************************************************/
@@ -405,7 +405,7 @@ double Pp::distToroidal3D(int *i, int *j) {
 					pow( fminf( window[1]-window[0]-fabs(points.at(*i).getX()-points.at(*j).getX()) , fabs(points.at(*i).getX()-points.at(*j).getX()) ) ,2.0F) +
 					pow( fminf( window[3]-window[2]-fabs(points.at(*i).getY()-points.at(*j).getY()) , fabs(points.at(*i).getY()-points.at(*j).getY()) ) ,2.0F) +
 					pow( fminf( window[5]-window[4]-fabs(points.at(*i).getZ()-points.at(*j).getZ()) , fabs(points.at(*i).getZ()-points.at(*j).getZ()) ) ,2.0F)   );
-  
+
 }
 /********************************************************************************************/
 bool Pp::distLessThan2D(int *i, int *j, double *R) {

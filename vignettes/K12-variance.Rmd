@@ -1,0 +1,100 @@
+---
+title: "Computing the variance of K12 under independent uniform marginals"
+author: "Tuomas Rajala"
+date: "`r Sys.Date()`"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Bivariate K variance under CSR}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r setup, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+How to compute the covariance of K12 estimator under independent binomial processes.
+
+The estimator we work with is of type defined by Ward & Ferrandino (1), see also Wiegand et al. (2):
+
+$$\hat K_{12}(r) = c(r)\sum_{x\in X_1}\sum_{y\in X_2}1_W(x)1_W(y)1(|x-y|<r)$$
+
+where the constant is for edge correction and normalisation,
+
+$$c(r)=\frac{\pi r^2 |W|^2}{n_1n_2 \Gamma_W(r)}$$
+
+with 
+
+$$\Gamma_W(r) = \int_W\int_W 1_{b(o,r)}(x-y)dxdy = 2\pi\int_0^r t \bar\gamma_W(t) dt$$
+with isotropised set covariance $\bar\gamma_W$ of $W$.
+
+
+```{r}
+library(bivpower)
+library(spatstat)
+```
+
+Setup example:
+
+```{r}
+# Window
+W <- square(100)
+V <- area(W)
+# Abundances
+n <- c(50, 100)
+# Ranges for estimation
+r <- 1:50
+```
+
+Computing parts of the variance requires MC integration. Let's do all bits in one go:
+
+```{r, cache=TRUE}
+# Ball-ball integral with formula for rectangles
+I1 <- double_integral_ball(W, r)
+# Triple integral, using MC. Average over few more efficient.
+G3l <- sapply(1:5, function(...) triple_integral_ball_ball_mc(W, r) )
+I4  <- rowMeans(G3l) 
+a1 <- I1^2/V^4
+a2 <- I4/V^3
+a4 <- I1/V^2
+#
+K12norm <- area(W)^2 * pi * r^2 / ( prod(n) * I1)
+# Compile the variance:
+tvar <- K12norm^2 * ((sum(n)-2)*a2 + a4 - (sum(n)-1)*a1) * prod(n)
+
+# 
+# K12 Estimator, fixed n and W:
+K12 <- function(x) K12norm * K12_doublesum(cbind(x$x, x$y), as.integer(x$marks), r)
+```
+
+Compare to empirical:
+
+```{r, cache=TRUE}
+nsim <- 5000
+xl <- rmpoint(n, win = W, nsim = nsim)
+k12 <- sapply(xl, K12)
+
+# Empiricals
+memp <- apply(k12, 1, mean)
+vemp <- apply(k12, 1, var)
+
+```
+
+
+```{r, fig.width = 9, fig.height = 4}
+par(mfrow=c(1,2))
+plot(r, pi * r^2, main = "mean")
+lines(r, memp)
+plot(r, sqrt(tvar), main = "variance")
+lines(r, sqrt(vemp) )
+```
+
+Some MC error (will go away by increasing "n" in `triple_integral_ball_ball_mc` and `nsim`)
+
+## References
+
+1. J.S. Ward and F.J. Ferrandino. New derivation reduces bias and increases power of Ripley’s L index. Ecological Modelling, 116(2-3):225–236, 1999.
+2. T. Wiegand, P. Grabarnik, and D. Stoyan. Envelope tests for spatial point patterns with and without simulation. Ecosphere, 7(June):1–18, 2016.
